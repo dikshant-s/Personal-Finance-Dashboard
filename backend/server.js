@@ -5,7 +5,10 @@ const User = require('./modules/Users');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const Goals = require('./modules/Goals')
+<<<<<<< HEAD
 const Expense = require('./modules/Expenses')
+=======
+>>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
 dotenv.config();
 
 const app = express();
@@ -61,6 +64,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 const authenticateToken = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
     if (!token) return res.sendStatus(401); // Unauthorized if no token
@@ -71,6 +75,18 @@ const authenticateToken = (req, res, next) => {
       next(); // Call the next middleware/route handler
     });
   };
+=======
+// Middleware to authenticate JWT token
+// const authenticateToken = (req, res, next) => {
+//     const token = req.headers['authorization']?.split(' ')[1];
+//     if (!token) return res.sendStatus(401);
+//     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+//         if (err) return res.sendStatus(403);
+//         req.user = user;
+//         next();
+//     });
+// };
+>>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
 
 // *** Add Savings Goal ***
 
@@ -126,6 +142,7 @@ app.put('/saving-goals/id', async (req, res) => {
 
 
 
+<<<<<<< HEAD
 
 app.get('/expenses', authenticateToken, async (req, res) => {
     try {
@@ -182,9 +199,33 @@ app.get('/expenses', authenticateToken, async (req, res) => {
   });
   
  
+=======
+// POST endpoint to create a new contribution
+app.post('/contributions', async (req, res) => {
+    const { amount, date, goalId } = req.body;
+
+    try {
+        const newContribution = new Contribution({
+            amount,
+            date,
+            goalId,
+        });
+
+        await newContribution.save();
+        res.status(201).json(newContribution);
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating contribution: ' + error.message });
+    }
+});
+
+>>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
 
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+<<<<<<< HEAD
 ``
+=======
+``
+>>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
