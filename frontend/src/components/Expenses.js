@@ -1,43 +1,4 @@
-import React, { useState } from "react";
-
-// Dummy payments data
-const dummyPayments = [
-  {
-    amount: "50.00",
-    category: "Groceries",
-    paymentMethod: "Credit Card",
-    date: "2024-10-05",
-    description: "Weekly groceries shopping",
-  },
-  {
-    amount: "1200.00",
-    category: "Rent",
-    paymentMethod: "Bank Transfer",
-    date: "2024-10-01",
-    description: "Monthly rent payment",
-  },
-  {
-    amount: "75.00",
-    category: "Utilities",
-    paymentMethod: "Debit Card",
-    date: "2024-10-03",
-    description: "Electricity bill for October",
-  },
-  {
-    amount: "20.00",
-    category: "Entertainment",
-    paymentMethod: "Cash",
-    date: "2024-10-08",
-    description: "Movie night",
-  },
-  {
-    amount: "300.00",
-    category: "Subscriptions",
-    paymentMethod: "Credit Card",
-    date: "2024-10-10",
-    description: "Monthly streaming service",
-  },
-];
+import React, { useState, useEffect } from "react";
 
 const Expenses = () => {
   const [amount, setAmount] = useState("");
@@ -46,13 +7,59 @@ const Expenses = () => {
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [recurring, setRecurring] = useState(false);
-  const [expenses, setExpenses] = useState(dummyPayments); // Initialize with dummy payments
+  const [expenses, setExpenses] = useState([]);
+  const [editingExpense, setEditingExpense] = useState(null); // State for editing
 
-  const handleAddExpense = (e) => {
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      const response = await fetch("http://localhost:8000/expenses");
+      const data = await response.json();
+      setExpenses(data);
+    };
+    fetchExpenses();
+  }, []);
+
+  const addExpense = async (newExpense) => {
+    const response = await fetch("http://localhost:8000/expenses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newExpense),
+    });
+    const data = await response.json();
+    setExpenses([...expenses, data]);
+  };
+
+  const editExpense = async (updatedExpense) => {
+    const response = await fetch(`http://localhost:8000/expenses/${updatedExpense._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedExpense),
+    });
+    const data = await response.json();
+    setExpenses(expenses.map((expense) => (expense._id === data._id ? data : expense)));
+    setEditingExpense(null); // Clear editing state
+  };
+
+  const deleteExpense = async (id) => {
+    await fetch(`http://localhost:8000/expenses/${id}`, {
+      method: "DELETE",
+    });
+    setExpenses(expenses.filter((expense) => expense._id !== id));
+  };
+
+  const handleAddOrUpdateExpense = async (e) => {
     e.preventDefault();
     if (amount && category && paymentMethod && date) {
       const newExpense = { amount, category, paymentMethod, date, description };
-      setExpenses([...expenses, newExpense]);
+      if (editingExpense) {
+        await editExpense({ ...newExpense, _id: editingExpense._id });
+      } else {
+        await addExpense(newExpense);
+      }
       setAmount("");
       setCategory("");
       setPaymentMethod("");
@@ -64,8 +71,8 @@ const Expenses = () => {
 
   return (
     <div className="bg-gray-900 p-4 rounded-md overflow-hidden">
-      <h2 className="text-xl font-bold mb-4">Add Expense</h2>
-      <form onSubmit={handleAddExpense} className="mb-6">
+      <h2 className="text-xl font-bold mb-4">{editingExpense ? "Edit Expense" : "Add Expense"}</h2>
+      <form onSubmit={handleAddOrUpdateExpense} className="mb-6">
         <div className="grid grid-cols-2 gap-4">
           <input
             type="number"
@@ -118,7 +125,7 @@ const Expenses = () => {
           type="submit"
           className="mt-4 bg-blue-600 text-white p-2 rounded-md"
         >
-          Add Expense
+          {editingExpense ? "Update Expense" : "Add Expense"}
         </button>
       </form>
 
@@ -126,37 +133,40 @@ const Expenses = () => {
       <div className="overflow-x-auto">
         <table className="min-w-full bg-gray-800 border border-gray-600">
           <thead>
-            <tr className="bg-gray-700">
-              <th className="py-2 px-4 border-b">Date</th>
-              <th className="py-2 px-4 border-b">Description</th>
-              <th className="py-2 px-4 border-b">Category</th>
-              <th className="py-2 px-4 border-b">Amount</th>
-              <th className="py-2 px-4 border-b">Payment Method</th>
-              <th className="py-2 px-4 border-b">Actions</th>
+            <tr className="text-white">
+              <th className="border border-gray-600 p-2">Amount</th>
+              <th className="border border-gray-600 p-2">Category</th>
+              <th className="border border-gray-600 p-2">Payment Method</th>
+              <th className="border border-gray-600 p-2">Date</th>
+              <th className="border border-gray-600 p-2">Description</th>
+              <th className="border border-gray-600 p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {expenses.map((expense, index) => (
-              <tr key={index} className="hover:bg-gray-600">
-                <td className="py-2 px-4 border-b">{expense.date}</td>
-                <td className="py-2 px-4 border-b">{expense.description}</td>
-                <td className="py-2 px-4 border-b">{expense.category}</td>
-                <td className="py-2 px-4 border-b">{expense.amount}</td>
-                <td className="py-2 px-4 border-b">{expense.paymentMethod}</td>
-                <td className="py-2 px-4 border-b">
+            {expenses.map((expense) => (
+              <tr key={expense._id} className="text-white">
+                <td className="border border-gray-600 p-2">{expense.amount}</td>
+                <td className="border border-gray-600 p-2">{expense.category}</td>
+                <td className="border border-gray-600 p-2">{expense.paymentMethod}</td>
+                <td className="border border-gray-600 p-2">{expense.date}</td>
+                <td className="border border-gray-600 p-2">{expense.description}</td>
+                <td className="border border-gray-600 p-2">
                   <button
                     onClick={() => {
-                      // Logic to edit expense (not implemented)
+                      setEditingExpense(expense);
+                      setAmount(expense.amount);
+                      setCategory(expense.category);
+                      setPaymentMethod(expense.paymentMethod);
+                      setDate(expense.date);
+                      setDescription(expense.description);
                     }}
-                    className="text-blue-500 hover:underline"
+                    className="bg-yellow-500 text-white p-1 rounded-md mr-2"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => {
-                      setExpenses(expenses.filter((_, i) => i !== index));
-                    }}
-                    className="text-red-500 hover:underline ml-2"
+                    onClick={() => deleteExpense(expense._id)}
+                    className="bg-red-600 text-white p-1 rounded-md"
                   >
                     Delete
                   </button>
