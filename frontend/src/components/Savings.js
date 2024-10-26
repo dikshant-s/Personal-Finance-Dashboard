@@ -1,273 +1,275 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
 } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Savings = () => {
-  const [goals, setGoals] = useState([]);
-  const [goalForm, setGoalForm] = useState({
-    id: null,
-    name: '',
-    targetAmount: '',
-    currentSavings: '',
-    deadline: '',
-    description: ''
-  });
-  const [contribution, setContribution] = useState({
-    amount: '',
-    date: '',
-    goalId: '',
-    recurring: false,
-    interval: 'monthly'
-  });
-
-  const [error, setError] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-
-  const handleGoalChange = (e) => {
-    setGoalForm({ ...goalForm, [e.target.name]: e.target.value });
-  };
-
-  const handleContributionChange = (e) => {
-    setContribution({ ...contribution, [e.target.name]: e.target.value });
-  };
-
-  const addGoal = () => {
-    if (isEditing) {
-      setGoals(goals.map(goal => (goal.id === goalForm.id ? goalForm : goal)));
-      setIsEditing(false);
-    } else {
-      setGoals([...goals, { ...goalForm, id: goals.length + 1, progress: 0 }]);
-    }
-    resetGoalForm();
-  };
-
-  const resetGoalForm = () => {
-    setGoalForm({
-      id: null,
-      name: '',
-      targetAmount: '',
-      currentSavings: '',
-      deadline: '',
-      description: ''
+    const [goals, setGoals] = useState([]);
+    const [amountsToAdd, setAmountsToAdd] = useState({});
+    const [goalForm, setGoalForm] = useState({
+        goalName: '',
+        targetAmount: '',
+        currentSavings: 0,
+        deadline: '', // Deadline is handled as a string
+        description: '',
     });
-  };
+    const [contribution, setContribution] = useState({
+        amount: '',
+        date: '',
+        goalId: '',
+        recurring: false,
+        interval: 'monthly'
+    });
+    const [error, setError] = useState('');
+    const [isEditing, setIsEditing] = useState(false); // To manage editing state
 
-  const editGoal = (goal) => {
-    setGoalForm(goal);
-    setIsEditing(true);
-  };
+    useEffect(() => {
+        fetchGoals();
+    }, []);
 
-  const deleteGoal = (id) => {
-    setGoals(goals.filter(goal => goal.id !== id));
-  };
+    const fetchGoals = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/saved-goals', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
 
-  const addContribution = () => {
-    const goal = goals.find(g => g.id === Number(contribution.goalId));
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
 
-    if (goal) {
-      const contributionDate = new Date(contribution.date);
-      const deadlineDate = new Date(goal.deadline);
+            const goals = await response.json();
+            setGoals(goals);
+        } catch (error) {
+            console.error('Error fetching goals:', error);
+            setError('Error fetching goals: ' + error.message);
+        }
+    };
 
-      if (contributionDate > deadlineDate) {
-        setError('Deadline is reached. No further contributions are possible. Try to add savings to other goals.');
-        return;
-      }
+    const handleGoalChange = (e) => {
+        setGoalForm({ ...goalForm, [e.target.name]: e.target.value });
+    };
 
-      goal.currentSavings = Number(goal.currentSavings) + Number(contribution.amount);
-      setError('');
-      setContribution({ amount: '', date: '', goalId: '', recurring: false, interval: 'monthly' });
-    }
-  };
+    const handleContributionChange = (e) => {
+        setContribution({ ...contribution, [e.target.name]: e.target.value });
+    };
 
-  const calculateProgress = (goal) => {
-    const target = Number(goal.targetAmount);
-    const current = Number(goal.currentSavings);
-    return target > 0 ? Math.min((current / target) * 100, 100) : 0;
-  };
+    const resetGoalForm = () => {
+        setGoalForm({
+            id: null,
+            goalName: '',
+            targetAmount: '',
+            currentSavings: 0,
+            deadline: '', // Reset to empty string
+            description: ''
+        });
+        setIsEditing(false); // Reset editing state
+    };
 
-  const chartData = {
-    labels: goals.map(goal => goal.name),
-    datasets: [
-      {
-        label: 'Current Savings',
-        data: goals.map(goal => goal.currentSavings),
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-      },
-      {
-        label: 'Target Amount',
-        data: goals.map(goal => goal.targetAmount),
-        backgroundColor: 'rgba(255, 99, 132, 0.6)',
-      }
-    ],
-  };
+    const handleSaveGoal = async (e) => {
+        e.preventDefault();
+        console.log('Form Values:', goalForm);
 
-  const totalCurrentSavings = goals.reduce((acc, goal) => acc + Number(goal.currentSavings), 0);
-  const totalTargetAmount = goals.reduce((acc, goal) => acc + Number(goal.targetAmount), 0);
+        try {
+            const response = await fetch('http://localhost:8000/saving-goals', {
+                method: isEditing ? 'PUT' : 'POST', // Change method based on editing state
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(goalForm),
+            });
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <h1 className="text-3xl font-semibold mb-6">Savings Goals</h1>
+            const data = await response.json();
 
-      {/* Set Savings Goal Section */}
-      <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">{isEditing ? 'Edit Savings Goal' : 'Set Savings Goal'}</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="name"
-            value={goalForm.name}
-            onChange={handleGoalChange}
-            placeholder="Goal Name"
-            className="p-2 rounded bg-gray-700 focus:bg-gray-600"
-          />
-          <input
-            type="number"
-            name="targetAmount"
-            value={goalForm.targetAmount}
-            onChange={handleGoalChange}
-            placeholder="Target Amount"
-            className="p-2 rounded bg-gray-700 focus:bg-gray-600"
-          />
-          <input
-            type="number"
-            name="currentSavings"
-            value={goalForm.currentSavings}
-            onChange={handleGoalChange}
-            placeholder="Current Savings"
-            className="p-2 rounded bg-gray-700 focus:bg-gray-600"
-          />
-          <input
-            type="date"
-            name="deadline"
-            value={goalForm.deadline}
-            onChange={handleGoalChange}
-            className="p-2 rounded bg-gray-700 focus:bg-gray-600"
-          />
-          <textarea
-            name="description"
-            value={goalForm.description}
-            onChange={handleGoalChange}
-            placeholder="Goal Description"
-            className="col-span-2 p-2 rounded bg-gray-700 focus:bg-gray-600"
-          />
-        </div>
-        <button
-          onClick={addGoal}
-          className="mt-4 px-4 py-2 bg-blue-600 rounded hover:bg-blue-500"
-        >
-          {isEditing ? 'Update Goal' : 'Add Goal'}
-        </button>
-      </div>
+            if (response.ok) {
+                console.log('Savings goal saved successfully:', data);
+                resetGoalForm();
+                fetchGoals(); // Re-fetch goals to include the newly added one
+            } else {
+                console.error('Error saving savings goal:', data.message || 'Something went wrong');
+                alert(data.message || 'Something went wrong');
+            }
+        } catch (error) {
+            console.error('Network Error:', error);
+            alert('Network error. Please try again later.');
+        }
+    };
 
-      {/* Savings Summary with Chart */}
-      <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">Savings Summary</h2>
-        <Bar
-          data={chartData}
-          options={{
-            responsive: true,
-            plugins: {
-              legend: {
-                position: 'top',
-              },
-              title: {
-                display: true,
-                text: 'Savings Goals Overview',
-              },
+
+
+    const handleAddSavings = (goalId) => {
+        const amountToAdd = Number(amountsToAdd[goalId] || 0); // Get the amount for the specific goal
+    
+        if (!isNaN(amountToAdd) && amountToAdd > 0) {
+            console.log('Adding savings to goal:', goalId, 'Amount:', amountToAdd);
+            
+            // Ensure that each goal has a unique ID and that we're targeting only the correct one
+            const updatedGoals = goals.map((goal) => {
+                if (goal.id === goalId) {
+                    console.log('Updating goal:', goal.goalName, 'Current Savings:', goal.currentSavings, 'New Savings:', goal.currentSavings + amountToAdd);
+                    return { ...goal, currentSavings: goal.currentSavings + amountToAdd };
+                }
+                return goal; // For other goals, return them as they are
+            });
+    
+            setGoals(updatedGoals); // Set the updated goals array in state
+            setAmountsToAdd((prev) => ({ ...prev, [goalId]: '' })); // Reset input for this goal
+        }
+    };
+    
+
+
+    const calculateProgress = (goal) => {
+        const target = Number(goal.targetAmount);
+        const current = Number(goal.currentSavings);
+        return target > 0 ? Math.min((current / target) * 100, 100) : 0;
+    };
+
+    const chartData = {
+        labels: goals.map(goal => goal.goalName),
+        datasets: [
+            {
+                label: 'Current Savings',
+                data: goals.map(goal => goal.currentSavings),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
             },
-            scales: {
-              y: {
-                beginAtZero: true,
-              },
-            },
-          }}
-        />
-      </div>
+            {
+                label: 'Target Amount',
+                data: goals.map(goal => goal.targetAmount),
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+            }
+        ],
+    };
 
-      {/* Savings Overview */}
-      <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">Savings Overview</h2>
-        {goals.map((goal) => (
-          <div key={goal.id} className="mb-6">
-            <div className="flex justify-between">
-              <div>
-                <h3 className="text-xl font-semibold">{goal.name}</h3>
-                <p className="text-gray-400">Target: ${goal.targetAmount}</p>
-                <p className="text-gray-400">Current Savings: ${goal.currentSavings}</p>
-                <p className="text-gray-400">Deadline: {goal.deadline}</p>
-                <p className="text-gray-400">Progress: {calculateProgress(goal)}%</p>
-              </div>
-              <div>
-                <button onClick={() => editGoal(goal)} className="px-4 py-2 bg-yellow-600 rounded hover:bg-yellow-500 mr-2">Edit</button>
-                <button onClick={() => deleteGoal(goal.id)} className="px-4 py-2 bg-red-600 rounded hover:bg-red-500">Delete</button>
-              </div>
+    return (
+        <div className="min-h-screen bg-gray-900 text-white p-6">
+            <h1 className="text-3xl font-semibold mb-6">Savings Goals</h1>
+
+            {/* Set Savings Goal Section */}
+            <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
+                <h2 className="text-2xl font-semibold mb-4">{isEditing ? 'Edit Savings Goal' : 'Set Savings Goal'}</h2>
+                <div className="grid grid-cols-2 gap-4">
+                    <input
+                        type="text"
+                        name="goalName"
+                        value={goalForm.goalName}
+                        onChange={handleGoalChange}
+                        placeholder="Goal Name"
+                        className="p-2 rounded bg-gray-700 focus:bg-gray-600"
+                    />
+                    <input
+                        type="number"
+                        name="targetAmount"
+                        value={goalForm.targetAmount}
+                        onChange={handleGoalChange}
+                        placeholder="Target Amount"
+                        className="p-2 rounded bg-gray-700 focus:bg-gray-600"
+                    />
+                    <input
+                        type="number"
+                        name="currentSavings"
+                        value={goalForm.currentSavings}
+                        onChange={handleGoalChange}
+                        placeholder="Current Savings"
+                        className="p-2 rounded bg-gray-700 focus:bg-gray-600"
+                    />
+                    <input
+                        type="text" // Change type to text to handle deadline as a string
+                        name="deadline"
+                        value={goalForm.deadline}
+                        onChange={handleGoalChange}
+                        placeholder="Deadline (e.g., 2024-12-31)"
+                        className="p-2 rounded bg-gray-700 focus:bg-gray-600"
+                    />
+                    <textarea
+                        name="description"
+                        value={goalForm.description}
+                        onChange={handleGoalChange}
+                        placeholder="Goal Description"
+                        className="col-span-2 p-2 rounded bg-gray-700 focus:bg-gray-600"
+                    />
+                </div>
+                <button
+                    onClick={handleSaveGoal}
+                    className="mt-4 px-4 py-2 bg-blue-600 rounded hover:bg-blue-500"
+                >
+                    Add Goal
+                </button>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-4 mt-2">
-              <div
-                className="bg-blue-500 h-4 rounded-full"
-                style={{ width: `${calculateProgress(goal)}%` }}
-              ></div>
+
+            {/* Savings Summary with Chart */}
+            <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
+                <h2 className="text-2xl font-semibold mb-4">Savings Summary</h2>
+                <Bar
+                    data={chartData}
+                    options={{
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Savings Goals Overview',
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                            },
+                        },
+                    }}
+                />
             </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Flex container for Contribution section */}
-      <div className="bg-gray-800 p-6 rounded-lg w-full mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Add Contribution</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="number"
-            name="amount"
-            value={contribution.amount}
-            onChange={handleContributionChange}
-            placeholder="Amount Contributed"
-            className="p-2 rounded bg-gray-700 focus:bg-gray-600"
-          />
-          <input
-            type="date"
-            name="date"
-            value={contribution.date}
-            onChange={handleContributionChange}
-            className="p-2 rounded bg-gray-700 focus:bg-gray-600"
-          />
-          <select
-            name="goalId"
-            value={contribution.goalId}
-            onChange={handleContributionChange}
-            className="p-2 rounded bg-gray-700 focus:bg-gray-600"
-          >
-            <option value="">Select Goal</option>
-            {goals.map(goal => (
-              <option key={goal.id} value={goal.id}>{goal.name}</option>
-            ))}
-          </select>
+            {/* Savings Overview */}
+            <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
+                <h2 className="text-2xl font-semibold mb-4">Savings Overview</h2>
+                {goals.map((goal) => (
+                    <div key={goal.id} className="mb-6">
+                        <div className="flex justify-between">
+                            <div>
+                                <h3 className="text-xl font-semibold">{goal.goalName}</h3>
+                                <p className="text-gray-400">Target: ${goal.targetAmount}</p>
+                                <p className="text-gray-400">Current Savings: ${goal.currentSavings}</p>
+                                <p className="text-gray-400">Deadline: {goal.deadline}</p>
+                                <p className="text-gray-400">Progress: {calculateProgress(goal)}%</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                            <input
+                                type="number"
+                                value={amountsToAdd[goal.id] || ''} // Access the amount for the specific goal
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setAmountsToAdd((prev) => ({ ...prev, [goal.id]: value })); // Update state for input
+                                }}
+                                placeholder="Add amount"
+                                className="p-2 rounded bg-gray-700 focus:bg-gray-600"
+                            />
+                            <button
+                                onClick={() => handleAddSavings(goal.id)} // Pass the specific goal ID to handleAddSavings
+                                className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500"
+                            >
+                                Add Savings
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
-        <button
-          onClick={addContribution}
-          className="mt-4 px-4 py-2 bg-green-600 rounded hover:bg-green-500"
-        >
-          Add Contribution
-        </button>
-      </div>
-
-      {error && (
-        <div className="mt-4 p-4 bg-red-600 text-white rounded">
-          {error}
-        </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Savings;
