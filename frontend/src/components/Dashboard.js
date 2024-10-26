@@ -9,7 +9,7 @@ import Expenses from "./Expenses";
 import Savings from "./Savings";
 import Investments from "./Investments";
 
-const Dashboard = () => {
+const Dashboard = ({ user }) => {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
 
   const renderComponent = () => {
@@ -17,10 +17,12 @@ const Dashboard = () => {
       case "Dashboard":
         return (
           <div>
-            <header className="text-3xl mb-6">Welcome Back, Ali 👋</header>
+            <header className="text-3xl mb-6">
+              {user ? `Welcome Back, ${user} 👋` : 'Welcome Back!'}
+            </header>
             <div className="main flex">
               <div className="1 wd-40">
-                <div className=" first grid grid-cols-2 gap-6 mb-6 ">
+                <div className="first grid grid-cols-2 gap-6 mb-6">
                   <IncomeOutcome type="Income" amount="$632,000" />
                   <IncomeOutcome type="Outcome" amount="$632,000" />
                 </div>
@@ -29,7 +31,7 @@ const Dashboard = () => {
                   <Transactions />
                 </div>
               </div>
-              <div className="2 flex flex-col p-10 gap-10 ">
+              <div className="2 flex flex-col p-10 gap-10">
                 <CardDetails />
                 <Activity />
               </div>
@@ -48,9 +50,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex  px-2">
+    <div className="flex px-2">
       <Sidebar setActiveComponent={setActiveComponent} />
-      <div className="w-4/5 p-8  ">
+      <div className="w-4/5 p-8">
         {renderComponent()}
       </div>
     </div>
