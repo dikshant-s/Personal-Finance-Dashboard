@@ -7,6 +7,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [isLoggged,setIsLogged] = useState(false)
 
   const handleLogin = async (e) => {
     e.preventDefault(); 
@@ -24,8 +25,11 @@ const Login = () => {
 
       if (response.ok) {
         console.log('Login successful:', data);
+        setIsLogged(true)
         navigate('/dashboard');
-        localStorage.setItem(data.token)
+        localStorage.setItem("token", data.token); // Save the token with a key
+        localStorage.setItem("name", data.name);   // Save the name with a key      
+        
       } else {
         setError(data.message || 'Login failed. Please try again.');
       }
@@ -38,7 +42,7 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
       <div className="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-md shadow-md">
-        <h2 className="text-3xl font-semibold text-center">Welcome Back</h2>
+        {isLoggged && <h2 className="text-3xl font-semibold text-center">Welcome Back! </h2> }
         <p className="text-center text-gray-400">Login to your account</p>
         
         {error && <p className="text-red-500 text-center">{error}</p>}

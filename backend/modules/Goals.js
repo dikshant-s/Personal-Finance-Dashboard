@@ -20,7 +20,13 @@ const savingsGoalSchema = new mongoose.Schema({
     description: {
         type: String,
         trim: true
+    },
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Reference to the User model
+        required: true // Ensure userId is provided
     }
 });
+
 const SavingGoals = mongoose.model('SavingGoals', savingsGoalSchema);
 module.exports = SavingGoals;

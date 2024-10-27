@@ -12,24 +12,47 @@ const Expenses = () => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      const response = await fetch("http://localhost:8000/expenses");
-      const data = await response.json();
-      setExpenses(data);
+      const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
+      const response = await fetch("http://localhost:8000/expenses", {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Include token in the Authorization header
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setExpenses(data); // Update state with fetched expenses
+      } else {
+        console.error("Failed to fetch expenses");
+      }
     };
     fetchExpenses();
   }, []);
 
+
   const addExpense = async (newExpense) => {
+    const token = localStorage.getItem('token'); // Retrieve the token from local storage
     const response = await fetch("http://localhost:8000/expenses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
       },
       body: JSON.stringify(newExpense),
     });
-    const data = await response.json();
-    setExpenses([...expenses, data]);
+
+    if (response.ok) {
+      const data = await response.json();
+      setExpenses([...expenses, data]); // Update the expenses state with the new expense
+    } else {
+      const errorData = await response.json();
+      console.error('Error adding expense:', errorData.message); // Log any error message from the server
+    }
   };
+
 
   const editExpense = async (updatedExpense) => {
     const response = await fetch(`http://localhost:8000/expenses/${updatedExpense._id}`, {
@@ -45,10 +68,22 @@ const Expenses = () => {
   };
 
   const deleteExpense = async (id) => {
-    await fetch(`http://localhost:8000/expenses/${id}`, {
+    const token = localStorage.getItem('token'); // Retrieve the token from local storage
+
+    const response = await fetch(`http://localhost:8000/expenses/${id}`, {
       method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
+      },
     });
-    setExpenses(expenses.filter((expense) => expense._id !== id));
+
+    if (response.ok) {
+      // If the delete was successful, update the state to remove the deleted expense
+      setExpenses(expenses.filter((expense) => expense._id !== id));
+    } else {
+      const errorData = await response.json();
+      console.error('Error deleting expense:', errorData.message); // Log any error message from the server
+    }
   };
 
   const handleAddOrUpdateExpense = async (e) => {
@@ -70,7 +105,7 @@ const Expenses = () => {
   };
 
   return (
-    <div className="bg-gray-900 p-4 rounded-md overflow-hidden">
+    <div className="bg-indigo-950 p-4   rounded-2xl overflow-hidden">
       <h2 className="text-xl font-bold mb-4">{editingExpense ? "Edit Expense" : "Add Expense"}</h2>
       <form onSubmit={handleAddOrUpdateExpense} className="mb-6">
         <div className="grid grid-cols-2 gap-4">
@@ -111,7 +146,7 @@ const Expenses = () => {
             onChange={(e) => setDescription(e.target.value)}
             className="border border-gray-600 p-2 rounded-md col-span-2 text-black"
           />
-          <label className="flex items-center col-span-2 text-black">
+          <label className="flex items-center col-span-2 text-white">
             <input
               type="checkbox"
               checked={recurring}
@@ -165,7 +200,12 @@ const Expenses = () => {
                     Edit
                   </button>
                   <button
-                    onClick={() => deleteExpense(expense._id)}
+                    onClick={async () => {
+                      const confirmed = window.confirm("Are you sure you want to delete this expense?");
+                      if (confirmed) {
+                        await deleteExpense(expense._id); // Call the existing delete function
+                      }
+                    }}
                     className="bg-red-600 text-white p-1 rounded-md"
                   >
                     Delete
@@ -173,6 +213,7 @@ const Expenses = () => {
                 </td>
               </tr>
             ))}
+
           </tbody>
         </table>
       </div>

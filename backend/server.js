@@ -5,10 +5,9 @@ const User = require('./modules/Users');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const Goals = require('./modules/Goals')
-<<<<<<< HEAD
 const Expense = require('./modules/Expenses')
-=======
->>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
+const Investment = require('./modules/Investments')
+const Savings = require('./modules/Savings')
 dotenv.config();
 
 const app = express();
@@ -57,115 +56,199 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" });
         }
         const token = generateToken(user);
-        res.status(200).json({ message: "Logged in successfully", token });
+        res.status(200).json({ message: "Logged in successfully", token,name:user.name });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
-<<<<<<< HEAD
+
 const authenticateToken = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1]; // Get token from Authorization header
-    if (!token) return res.sendStatus(401); // Unauthorized if no token
-  
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) return res.sendStatus(403); // Forbidden if token is invalid
-      req.user = user; // Save user data to request object
-      next(); // Call the next middleware/route handler
-    });
-  };
-=======
-// Middleware to authenticate JWT token
-// const authenticateToken = (req, res, next) => {
-//     const token = req.headers['authorization']?.split(' ')[1];
-//     if (!token) return res.sendStatus(401);
-//     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-//         if (err) return res.sendStatus(403);
-//         req.user = user;
-//         next();
-//     });
-// };
->>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
+  const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Bearer scheme
 
-// *** Add Savings Goal ***
+  if (!token) return res.sendStatus(403); // Forbidden if no token
 
-app.post('/saving-goals', async (req, res) => {
-    try {
-        const { goalName, targetAmount, currentSavings, deadline, description } = req.body;
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403); // Forbidden if token is invalid
+    req.user = user; // Set user object to request
+    next(); // Call the next middleware/route handler
+  });
+};
 
-        // Check for missing fields
-        // if (!goalName || !targetAmount || !currentSavings || !deadline || !description) {
-        //     return res.status(400).json({ message: 'All fields are required' });
-        // }
+app.post('/saving-goals', authenticateToken, async (req, res) => {
+  const { goalName, targetAmount, currentSavings, deadline, description } = req.body;
 
-        // Ensure deadline is in correct format (if you expect a specific format)
+  // Get user ID from token
+  const userId = req.user.id;
 
-        const newGoal = new Goals({
-            goalName,
-            targetAmount,
-            currentSavings,
-            deadline,
-            description,
-        });
+  try {
+      const newGoal = new Goals({
+          goalName,
+          targetAmount,
+          currentSavings,
+          deadline,
+          description,
+          userId // Include userId in the goal document
+      });
 
-        await newGoal.save();
-        res.status(201).json({ message: 'Goal Saved', goal: newGoal });
-    } catch (error) {
-        console.error('Error adding new goal:', error); // Log the error on the server
-        res.status(500).json({ message: 'Error adding new goal', error: error.message }); // Send the error message back to the client
-    }
+      await newGoal.save();
+      res.status(201).json({ message: 'Goal Saved', goal: newGoal });
+  } catch (error) {
+      console.error('Error adding new goal:', error);
+      res.status(500).json({ message: 'Error adding new goal', error: error.message });
+  }
 });
 
 
-// *** Fetch Savings Goals ***
-app.get('/saved-goals', async (req, res) => {
-    try {
-        const goals = await Goals.find();
-        res.status(200).json(goals);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching saved Goals', error });
-    }
+// GET: Fetch savings goals for a specific user
+app.get('/saved-goals', authenticateToken, async (req, res) => {
+  try {
+      const userId = req.user.id; // Get user ID from the token
+      const goals = await Goals.find({ userId }); // Fetch goals for the specific user
+      res.status(200).json(goals);
+  } catch (error) {
+      res.status(500).json({ message: 'Error fetching saved goals', error });
+  }
 });
 
-app.put('/saving-goals/id', async (req, res) => {
-    const { currentSavings } = req.body;
-    const goalId = req.params.id;
+app.put('/saving-goals/:id', async (req, res) => {
+  const { amountToAdd } = req.body; // Get the amount to add from the request body
+  console.log('Updating goal ID:', req.params.id, 'with amount:', amountToAdd); // Log the incoming request
 
-    try {
-        const updatedGoal = await Goals.findByIdAndUpdate(goalId, { currentSavings }, { new: true });
-        res.status(200).json(updatedGoal);
-    } catch (error) {
-        res.status(500).json({ message: 'Error updating goal: ' + error.message });
-    }
+  try {
+      // Find the goal by ID and update the current savings
+      const goal = await Goals.findById(req.params.id);
+      if (!goal) {
+          console.log('Goal not found:', req.params.id);
+          return res.status(404).json({ message: 'Goal not found' });
+      }
+
+      // Update the current savings
+      goal.currentSavings += amountToAdd; // Increment current savings
+      await goal.save(); // Save the updated goal
+
+      res.status(200).json(goal); // Return the updated goal
+  } catch (error) {
+      console.error('Error updating goal:', error);
+      res.status(500).json({ message: 'Error updating goal', error: error.message });
+  }
+});
+
+app.delete('/saving-goals/:id', async (req, res) => {
+  try {
+      const goalId = req.params.id;
+      const deletedGoal = await Goals.findByIdAndDelete(goalId);
+      
+      if (!deletedGoal) {
+          return res.status(404).json({ message: 'Goal not found' });
+      }
+      res.status(200).json({ message: 'Goal deleted successfully' });
+  } catch (error) {
+      console.error('Error deleting goal:', error);
+      res.status(500).json({ message: 'Server error' });
+  }
 });
 
 
+// Investment end points 
 
-<<<<<<< HEAD
+app.get('/investments', authenticateToken, async (req, res) => {
+  try {
+      // Fetch investments for the user ID from the token
+      const userId = req.user.id; // Assuming `req.user.id` contains the logged-in user's ID
+      const investments = await Investment.find({ userId: userId });
+      
+      res.json({ investments });
+  } catch (error) {
+      console.error("Error fetching investments:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+app.post('/investments', authenticateToken, async (req, res) => {
+  const { assetName, type, quantity, purchasePrice, currentPrice } = req.body;
+  const investment = new Investment({
+      userId: req.user.id, // Ensure this is set correctly
+      assetName,
+      type,
+      quantity,
+      purchasePrice,
+      currentPrice,
+  });
+
+  try {
+      const newInvestment = await investment.save();
+      res.status(201).json(newInvestment);
+  } catch (err) {
+      res.status(400).json({ message: err.message });
+  }
+});
+
+app.delete('/investments/:id', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id; // Get the logged-in user's ID
+    const investmentId = req.params.id; // Get the investment ID from the URL
+
+    // Find the investment by ID and ensure it belongs to the user
+    const investment = await Investment.findOneAndDelete({ _id: investmentId, userId: userId });
+
+    if (!investment) {
+      return res.status(404).json({ message: "Investment not found or doesn't belong to user" });
+    }
+
+    res.json({ message: "Investment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting investment:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 app.get('/expenses', authenticateToken, async (req, res) => {
-    try {
+  try {
       const userId = req.user.id; // Get user ID from token
+      console.log("Fetching expenses for user ID:", userId); // Log user ID
       const expenses = await Expense.find({ userId }); // Fetch expenses for the user
+      console.log("Fetched expenses:", expenses); // Log fetched expenses
       res.json(expenses);
-    } catch (error) {
+  } catch (error) {
+      console.error("Error fetching expenses:", error); // Log the error
       res.status(500).json({ message: "Error fetching expenses" });
-    }
-  });
+  }
+});
+
   
   // Create a new expense
-  app.post("/expenses", async (req, res) => {
+  app.post('/expenses', authenticateToken, async (req, res) => {
     const { amount, category, paymentMethod, date, description } = req.body;
-    const newExpense = new Expense({ amount, category, paymentMethod, date, description });
+    
+    console.log('Received expense data:', req.body); // Log incoming request data
+    
+    // Check if any field is missing and handle it
+    if (!amount || !category || !paymentMethod || !date) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
   
     try {
-      const savedExpense = await newExpense.save();
-      res.status(201).json(savedExpense);
+      const expense = new Expense({
+        userId: req.user.id, // Get the user ID from the token
+        amount,
+        category,
+        paymentMethod,
+        date,
+        description,
+      });
+  
+      await expense.save();
+      res.status(201).json(expense);
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      console.error(error);
+      res.status(500).json({ message: 'Error creating expense' });
     }
   });
+  
   
   // Update an expense
   app.put("/expenses/:id", async (req, res) => {
@@ -192,6 +275,11 @@ app.get('/expenses', authenticateToken, async (req, res) => {
   app.delete("/expenses/:id", async (req, res) => {
     try {
       const removedExpense = await Expense.findByIdAndDelete(req.params.id);
+  
+      if (!removedExpense) {
+        return res.status(404).json({ message: "Expense not found" }); // Handle not found
+      }
+  
       res.json(removedExpense);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -199,33 +287,40 @@ app.get('/expenses', authenticateToken, async (req, res) => {
   });
   
  
-=======
-// POST endpoint to create a new contribution
-app.post('/contributions', async (req, res) => {
-    const { amount, date, goalId } = req.body;
 
+  app.get('/total-income', authenticateToken, async (req, res) => {
     try {
-        const newContribution = new Contribution({
-            amount,
-            date,
-            goalId,
-        });
-
-        await newContribution.save();
-        res.status(201).json(newContribution);
+      const userId = req.user.id;
+  
+      // Fetch total savings
+      const totalSavingsGoals = await Goals.aggregate([  // Ensure this matches the model name
+        { $match: { userId: userId } },
+        { $group: { _id: null, total: { $sum: "$currentSavings" } } }
+      ]);
+      const totalSavings = totalSavingsGoals.length > 0 ? totalSavingsGoals[0].total : 0;
+  
+      // Fetch total investments
+      const totalInvestments = await Investment.aggregate([
+        { $match: { userId: userId } },
+        { $group: { _id: null, total: { $sum: { $multiply: ["$quantity", "$currentPrice"] } } } }
+      ]);
+      const totalInvestmentValue = totalInvestments.length > 0 ? totalInvestments[0].total : 0;
+  
+      // Combine totals
+      const totalIncome = totalSavings + totalInvestmentValue;
+      console.log(totalIncome)
+      res.json({ totalIncome });
     } catch (error) {
-        res.status(500).json({ message: 'Error creating contribution: ' + error.message });
+      console.error("Error fetching total income:", error);
+      res.status(500).json({ message: "Server error" });
     }
-});
+  });
+  
 
->>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
+
 
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-<<<<<<< HEAD
-``
-=======
-``
->>>>>>> 4bfabe7242f64d14de3d4413e45f561221f2f588
+

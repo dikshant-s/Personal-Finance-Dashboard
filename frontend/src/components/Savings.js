@@ -42,6 +42,7 @@ const Savings = () => {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Include token in the headers
                 },
             });
 
@@ -56,6 +57,7 @@ const Savings = () => {
             setError('Error fetching goals: ' + error.message);
         }
     };
+
 
     const handleGoalChange = (e) => {
         setGoalForm({ ...goalForm, [e.target.name]: e.target.value });
@@ -83,11 +85,12 @@ const Savings = () => {
 
         try {
             const response = await fetch('http://localhost:8000/saving-goals', {
-                method: isEditing ? 'PUT' : 'POST', // Change method based on editing state
+                method: 'POST', // Keep this as POST
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the JWT token
                 },
-                body: JSON.stringify(goalForm),
+                body: JSON.stringify(goalForm), // Include the goalForm data
             });
 
             const data = await response.json();
@@ -108,26 +111,78 @@ const Savings = () => {
 
 
 
-    const handleAddSavings = (goalId) => {
+    const handleAddSavings = async (goalId) => {
         const amountToAdd = Number(amountsToAdd[goalId] || 0); // Get the amount for the specific goal
-    
+
         if (!isNaN(amountToAdd) && amountToAdd > 0) {
             console.log('Adding savings to goal:', goalId, 'Amount:', amountToAdd);
-            
-            // Ensure that each goal has a unique ID and that we're targeting only the correct one
-            const updatedGoals = goals.map((goal) => {
-                if (goal.id === goalId) {
-                    console.log('Updating goal:', goal.goalName, 'Current Savings:', goal.currentSavings, 'New Savings:', goal.currentSavings + amountToAdd);
-                    return { ...goal, currentSavings: goal.currentSavings + amountToAdd };
+
+            try {
+                // Send a PUT request to update the savings for the specific goal
+                const response = await fetch(`http://localhost:8000/saving-goals/${goalId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the JWT token
+                    },
+                    body: JSON.stringify({ amountToAdd }), // Send the amount to add
+                });
+
+
+                console.log('Response status:', response.status); // Log the response status
+
+                if (response.ok) {
+                    const updatedGoal = await response.json(); // Get the updated goal from the server
+                    console.log('Goal updated successfully:', updatedGoal);
+
+                    // Update the local state with the updated goal
+                    const updatedGoals = goals.map((goal) => {
+                        if (goal._id === goalId) { // Make sure to use _id here
+                            return updatedGoal; // Replace with updated goal
+                        }
+                        return goal; // Return others as they are
+                    });
+
+                    setGoals(updatedGoals); // Update the state
+                } else {
+                    console.error('Error updating savings goal:', await response.json());
                 }
-                return goal; // For other goals, return them as they are
-            });
-    
-            setGoals(updatedGoals); // Set the updated goals array in state
-            setAmountsToAdd((prev) => ({ ...prev, [goalId]: '' })); // Reset input for this goal
+            } catch (error) {
+                console.error('Network error:', error);
+            } finally {
+                setAmountsToAdd((prev) => ({ ...prev, [goalId]: '' })); // Reset input for this goal
+            }
+        } else {
+            console.warn('Invalid amount to add:', amountToAdd);
         }
     };
-    
+
+    const handleDeleteGoal = async (goalId) => {
+        if (window.confirm('Are you sure you want to delete this goal?')) { // Confirm deletion
+            try {
+                const response = await fetch(`http://localhost:8000/saving-goals/${goalId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}` // Include the JWT token
+                    },
+                });
+
+                if (response.ok) {
+                    console.log('Goal deleted successfully');
+                    // Update local state to remove the deleted goal
+                    setGoals((prevGoals) => prevGoals.filter((goal) => goal._id !== goalId));
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error deleting goal:', errorData.message);
+                    alert('Failed to delete goal: ' + errorData.message);
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                alert('Network error. Please try again later.');
+            }
+        }
+    };
 
 
     const calculateProgress = (goal) => {
@@ -153,7 +208,7 @@ const Savings = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6">
+        <div className="min-h-screen bg-indigo-950 rounded-2xl text-white p-6">
             <h1 className="text-3xl font-semibold mb-6">Savings Goals</h1>
 
             {/* Set Savings Goal Section */}
@@ -237,7 +292,7 @@ const Savings = () => {
             <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
                 <h2 className="text-2xl font-semibold mb-4">Savings Overview</h2>
                 {goals.map((goal) => (
-                    <div key={goal.id} className="mb-6">
+                    <div key={goal._id} className="mb-6"> {/* Use goal._id here */}
                         <div className="flex justify-between">
                             <div>
                                 <h3 className="text-xl font-semibold">{goal.goalName}</h3>
@@ -246,20 +301,26 @@ const Savings = () => {
                                 <p className="text-gray-400">Deadline: {goal.deadline}</p>
                                 <p className="text-gray-400">Progress: {calculateProgress(goal)}%</p>
                             </div>
+                            <button
+                                onClick={() => handleDeleteGoal(goal._id)} // Call delete handler with goal ID
+                                className="text-red-600 hover:text-red-500"
+                            >
+                                Delete
+                            </button>
                         </div>
                         <div className="flex gap-2 mt-2">
                             <input
                                 type="number"
-                                value={amountsToAdd[goal.id] || ''} // Access the amount for the specific goal
+                                value={amountsToAdd[goal._id] || ''} // Access the amount for the specific goal using _id
                                 onChange={(e) => {
                                     const value = e.target.value;
-                                    setAmountsToAdd((prev) => ({ ...prev, [goal.id]: value })); // Update state for input
+                                    setAmountsToAdd((prev) => ({ ...prev, [goal._id]: value })); // Update state for input using _id
                                 }}
                                 placeholder="Add amount"
                                 className="p-2 rounded bg-gray-700 focus:bg-gray-600"
                             />
                             <button
-                                onClick={() => handleAddSavings(goal.id)} // Pass the specific goal ID to handleAddSavings
+                                onClick={() => handleAddSavings(goal._id)} // Pass the specific goal ID to handleAddSavings
                                 className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500"
                             >
                                 Add Savings
@@ -267,6 +328,7 @@ const Savings = () => {
                         </div>
                     </div>
                 ))}
+
             </div>
         </div>
     );

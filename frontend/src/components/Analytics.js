@@ -10,9 +10,9 @@ const data = [
 
 const Analytics = () => {
   return (
-    <div className="bg-indigo-950 p-4 rounded-2xl shadow-md">
+    <div className="bg-indigo-950 p-4 px-6 rounded-2xl shadow-md">
       <h2 className="text-lg mb-4">Analytics</h2>
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="102%" height={200} >
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
