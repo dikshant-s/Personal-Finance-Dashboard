@@ -46,7 +46,7 @@ const Sidebar = ({ setActiveComponent }) => {
           alt="dashboardIcon"
           className="inline-flex align-middle w-11 h-15 mr-2"
         />
-        <div className="text-3xl font-semibold">PersonalFinanceDashboard</div>
+        <div className="text-3xl font-semibold">APNAKarcha</div>
       </div>
       <nav>
         <ul className="space-y-10 text-lg">
