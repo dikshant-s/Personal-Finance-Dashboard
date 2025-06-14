@@ -26,7 +26,7 @@ const InvestmentPage = () => {
       }
 
       try {
-        const response = await fetch("http://localhost:8000/investments", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/investments`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -59,7 +59,7 @@ const InvestmentPage = () => {
 
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch("http://localhost:8000/investments", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/investments`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -110,7 +110,7 @@ const InvestmentPage = () => {
     }
   
     try {
-      const response = await fetch(`http://localhost:8000/investments/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/investments/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

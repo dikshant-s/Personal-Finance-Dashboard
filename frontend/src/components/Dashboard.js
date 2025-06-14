@@ -22,7 +22,7 @@ const Dashboard = ({ user }) => {
       const token = localStorage.getItem("token");
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:8000/total-income`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/total-income`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,

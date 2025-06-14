@@ -38,7 +38,7 @@ const Savings = () => {
 
     const fetchGoals = async () => {
         try {
-            const response = await fetch('http://localhost:8000/saved-goals', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/saved-goals`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ const Savings = () => {
         console.log('Form Values:', goalForm);
 
         try {
-            const response = await fetch('http://localhost:8000/saving-goals', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/saving-goals`, {
                 method: 'POST', // Keep this as POST
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const Savings = () => {
 
             try {
                 // Send a PUT request to update the savings for the specific goal
-                const response = await fetch(`http://localhost:8000/saving-goals/${goalId}`, {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/saving-goals/${goalId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ const Savings = () => {
     const handleDeleteGoal = async (goalId) => {
         if (window.confirm('Are you sure you want to delete this goal?')) { // Confirm deletion
             try {
-                const response = await fetch(`http://localhost:8000/saving-goals/${goalId}`, {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/saving-goals/${goalId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

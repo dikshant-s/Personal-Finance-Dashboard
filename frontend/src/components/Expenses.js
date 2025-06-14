@@ -14,7 +14,7 @@ const Expenses = () => {
     const fetchExpenses = async () => {
       const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
-      const response = await fetch("http://localhost:8000/expenses", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`, // Include token in the Authorization header
@@ -35,7 +35,7 @@ const Expenses = () => {
 
   const addExpense = async (newExpense) => {
     const token = localStorage.getItem('token'); // Retrieve the token from local storage
-    const response = await fetch("http://localhost:8000/expenses", {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -55,7 +55,7 @@ const Expenses = () => {
 
 
   const editExpense = async (updatedExpense) => {
-    const response = await fetch(`http://localhost:8000/expenses/${updatedExpense._id}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses/${updatedExpense._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +70,7 @@ const Expenses = () => {
   const deleteExpense = async (id) => {
     const token = localStorage.getItem('token'); // Retrieve the token from local storage
 
-    const response = await fetch(`http://localhost:8000/expenses/${id}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
