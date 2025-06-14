@@ -8,20 +8,18 @@ import siteIcon from "../assets/siteIcon.svg";
 import logout from "../assets/logout.svg";
 import { useNavigate } from "react-router-dom";
 
-
-
 const Sidebar = ({ setActiveComponent }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const token = localStorage.getItem('token')
-  const name = localStorage.getItem('name')
+  const token = localStorage.getItem("token");
+  const name = localStorage.getItem("name");
 
   const handleLogout = () => {
-    localStorage.removeItem(token)
-    localStorage.removeItem(name)
-    navigate('/')
-  }
+    localStorage.removeItem("token");
+    localStorage.removeItem("name");
+    navigate("/");
+  };
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
@@ -39,26 +37,26 @@ const Sidebar = ({ setActiveComponent }) => {
   };
 
   return (
-    <div className="bg-indigo-950 mb-10 h-full w-1/5 text-white flex flex-col items-start p-6 rounded-2xl mt-10">
-      <div className="flex justify-center mb-14 text-center items-center content-center">
+    <div className="bg-indigo-950 min-h-screen w-full md:w-1/3 lg:w-1/4 xl:w-1/5 text-white flex flex-col items-start p-4 sm:p-6 rounded-2xl mt-4 md:mt-10">
+      <div className="flex justify-center mb-14 text-center items-center w-full">
         <img
           src={siteIcon}
           alt="dashboardIcon"
-          className="inline-flex align-middle w-11 h-15 mr-2"
+          className="inline-flex align-middle w-11 h-11 mr-2"
         />
-        <div className="text-3xl font-semibold">APNAKarcha</div>
+        <div className="text-2xl sm:text-3xl font-semibold">APNAKarcha</div>
       </div>
-      <nav>
-        <ul className="space-y-10 text-lg">
+      <nav className="w-full">
+        <ul className="space-y-6 sm:space-y-10 text-base sm:text-lg w-full">
           <li>
             <button
               onClick={() => setActiveComponent("Dashboard")}
-              className="block hover:bg-blue-500 px-3 rounded-md py-1 align-middle justify-center"
+              className="flex items-center w-full hover:bg-blue-500 px-4 py-2 rounded-md"
             >
               <img
                 src={dashboardIcon}
                 alt="dashboardIcon"
-                className="inline-flex align-middle w-6 h-6 mr-2 bg-white rounded"
+                className="w-6 h-6 mr-3 bg-white rounded"
               />
               Dashboard
             </button>
@@ -66,12 +64,12 @@ const Sidebar = ({ setActiveComponent }) => {
           <li>
             <button
               onClick={() => setActiveComponent("Expenses")}
-              className="block hover:bg-blue-500 rounded-md px-3 py-1"
+              className="flex items-center w-full hover:bg-blue-500 px-4 py-2 rounded-md"
             >
               <img
                 src={analysisIcon}
                 alt="analysisIcon"
-                className="inline-flex align-middle w-6 h-6 mr-2 bg-white rounded"
+                className="w-6 h-6 mr-3 bg-white rounded"
               />
               Expenses
             </button>
@@ -79,12 +77,12 @@ const Sidebar = ({ setActiveComponent }) => {
           <li>
             <button
               onClick={() => setActiveComponent("Savings")}
-              className="block hover:bg-blue-500 rounded-md px-3 py-1"
+              className="flex items-center w-full hover:bg-blue-500 px-4 py-2 rounded-md"
             >
               <img
                 src={savingIcon}
                 alt="savingIcon"
-                className="inline-flex align-middle w-6 h-6 mr-2 bg-white rounded"
+                className="w-6 h-6 mr-3 bg-white rounded"
               />
               Savings
             </button>
@@ -92,59 +90,54 @@ const Sidebar = ({ setActiveComponent }) => {
           <li>
             <button
               onClick={() => setActiveComponent("Investments")}
-              className="block hover:bg-blue-500 rounded-md px-3 py-1"
+              className="flex items-center w-full hover:bg-blue-500 px-4 py-2 rounded-md"
             >
               <img
                 src={investmentIcon}
                 alt="investmentIcon"
-                className="inline-flex align-middle w-6 h-6 mr-2 bg-white rounded"
+                className="w-6 h-6 mr-3 bg-white rounded"
               />
               Investments
             </button>
           </li>
           <li>
             <button
-              onClick={() => setActiveComponent("BankAccount")} // Link to the Bank Account page
-              className="block hover:bg-blue-500 rounded-md px-3 py-1"
+              onClick={() => setActiveComponent("BankAccount")}
+              className="flex items-center w-full hover:bg-blue-500 px-4 py-2 rounded-md"
             >
               <img
                 src={bank}
-                alt="investmentIcon"
-                className="inline-flex align-middle w-6 h-6 mr-2 bg-white rounded"
+                alt="bankIcon"
+                className="w-6 h-6 mr-3 bg-white rounded"
               />
-
               Bank Account
             </button>
           </li>
 
           <li>
             <button
-              onClick={() => setActiveComponent("BankAccount")} // Link to the Bank Account page
-              className="block hover:bg-blue-500 rounded-md px-3 py-1"
+              onClick={handleLogout}
+              className="flex items-center w-full text-left px-4 py-2 mt-2 hover:bg-red-600 rounded-md"
             >
-            </button>
-            <button onClick={handleLogout} className="inline-flex ml-4 mb-3 align-middle">
               <img
                 src={logout}
-                alt="investmentIcon"
-                className="w-6 h-6 mr-2 bg-white rounded"
+                alt="logoutIcon"
+                className="w-6 h-6 mr-3 bg-white rounded"
               />
               Logout
             </button>
-
           </li>
 
           <li>
             <button
               onClick={toggleTheme}
-              className="py-1 px-2 ml-2 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-md transition-colors"
+              className="py-2 px-4 w-full text-center bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-md transition-colors mt-2"
             >
               {isDarkMode ? "Light Mode" : "Dark Mode"}
             </button>
           </li>
         </ul>
       </nav>
-
     </div>
   );
 };
