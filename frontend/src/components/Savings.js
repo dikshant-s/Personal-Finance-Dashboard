@@ -296,8 +296,8 @@ const Savings = () => {
                         <div className="flex justify-between">
                             <div>
                                 <h3 className="text-xl font-semibold">{goal.goalName}</h3>
-                                <p className="text-gray-400">Target: ${goal.targetAmount}</p>
-                                <p className="text-gray-400">Current Savings: ${goal.currentSavings}</p>
+                                <p className="text-gray-400">Target: ₹{goal.targetAmount}</p>
+                                <p className="text-gray-400">Current Savings: ₹{goal.currentSavings}</p>
                                 <p className="text-gray-400">Deadline: {goal.deadline}</p>
                                 <p className="text-gray-400">Progress: {calculateProgress(goal)}%</p>
                             </div>
