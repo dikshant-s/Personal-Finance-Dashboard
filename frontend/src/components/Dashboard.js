@@ -51,31 +51,31 @@ const Dashboard = ({ user }) => {
       case "Dashboard":
         return (
           <div>
-            <header className="text-3xl mb-6">
+            <header className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6">
               <h1>Welcome back, {name}</h1>
             </header>
-            <div className="main flex">
-              <div className="1 wd-40">
-                <div className="first grid grid-cols-2 gap-6 mb-6">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   {loading ? (
                     <div>Loading...</div>
                   ) : (
                     <>
                       {error ? (
-                        <div className="error">{error}</div>
+                        <div className="text-red-500">{error}</div>
                       ) : (
-                        <IncomeOutcome type="Income" amount="$632,000"/>
+                        <IncomeOutcome type="Income" amount={`₹${totalIncome.toLocaleString()}`} />
                       )}
-                      <IncomeOutcome type="Outcome" amount="$632,000" /> {/* Consider making this dynamic */}
+                      <IncomeOutcome type="Outcome" amount="₹632,000" /> {/* Optional: Make this dynamic */}
                     </>
                   )}
                 </div>
-                <div className="grid grid-row-2 gap-6">
+                <div className="grid grid-cols-1 gap-4">
                   <Analytics />
                   <Transactions />
                 </div>
               </div>
-              <div className="2 flex flex-col pl-12 justify-center gap-10">
+              <div className="flex flex-col gap-4 w-full lg:w-2/5">
                 <CardDetails />
                 <Activity />
               </div>
@@ -89,18 +89,18 @@ const Dashboard = ({ user }) => {
       case "Investments":
         return <Investments />;
       case "BankAccount":
-        return <BankAccount/>
+        return <BankAccount />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="flex px-2">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
       <Sidebar setActiveComponent={setActiveComponent} />
-      <div className="w-4/5 p-8">
+      <main className="flex-1 p-4 sm:p-6 md:p-8">
         {renderComponent()}
-      </div>
+      </main>
     </div>
   );
 };
