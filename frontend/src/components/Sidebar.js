@@ -44,7 +44,7 @@ const Sidebar = ({ setActiveComponent }) => {
           alt="dashboardIcon"
           className="inline-flex align-middle w-11 h-11 mr-2"
         />
-        <div className="text-2xl sm:text-3xl font-semibold">APNAKarcha</div>
+        <div className="text-2xl sm:text-3xl font-semibold">PersonalFinanceManager</div>
       </div>
       <nav className="w-full">
         <ul className="space-y-6 sm:space-y-10 text-base sm:text-lg w-full">
