@@ -7,7 +7,7 @@ import CardDetails from "./CardDetails";
 import Activity from "./Activity";
 import Expenses from "./Expenses";
 import Savings from "./Savings";
-import Investments from "./Investments"; 
+import Investments from "./Investments";
 import BankAccount from "./BankAccount";
 
 const Dashboard = ({ user }) => {
@@ -15,7 +15,7 @@ const Dashboard = ({ user }) => {
   const [totalIncome, setTotalIncome] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const name = localStorage.getItem('name');
+  const name = localStorage.getItem("name");
 
   useEffect(() => {
     const fetchTotalIncome = async () => {
@@ -51,12 +51,14 @@ const Dashboard = ({ user }) => {
       case "Dashboard":
         return (
           <div>
-            <header className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6">
+            <header className="text-2xl sm:text-3xl mb-6 font-semibold">
               <h1>Welcome back, {name}</h1>
             </header>
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+
+            <div className="main flex flex-col lg:flex-row gap-6">
+              {/* Left Column */}
+              <div className="w-full lg:w-2/3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   {loading ? (
                     <div>Loading...</div>
                   ) : (
@@ -64,24 +66,28 @@ const Dashboard = ({ user }) => {
                       {error ? (
                         <div className="text-red-500">{error}</div>
                       ) : (
-                        <IncomeOutcome type="Income" amount={`₹${totalIncome.toLocaleString()}`} />
+                        <IncomeOutcome type="Income" amount="₹632,000" />
                       )}
-                      <IncomeOutcome type="Outcome" amount="₹632,000" /> {/* Optional: Make this dynamic */}
+                      <IncomeOutcome type="Outcome" amount="₹632,000" />
                     </>
                   )}
                 </div>
-                <div className="grid grid-cols-1 gap-4">
+
+                <div className="grid grid-cols-1 gap-6">
                   <Analytics />
                   <Transactions />
                 </div>
               </div>
-              <div className="flex flex-col gap-4 w-full lg:w-2/5">
+
+              {/* Right Column */}
+              <div className="w-full lg:w-1/3 flex flex-col gap-6">
                 <CardDetails />
                 <Activity />
               </div>
             </div>
           </div>
         );
+
       case "Expenses":
         return <Expenses />;
       case "Savings":
@@ -96,11 +102,9 @@ const Dashboard = ({ user }) => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white transition-colors duration-300">
       <Sidebar setActiveComponent={setActiveComponent} />
-      <main className="flex-1 p-4 sm:p-6 md:p-8">
-        {renderComponent()}
-      </main>
+      <main className="w-full lg:w-4/5 p-4 sm:p-6 md:p-8">{renderComponent()}</main>
     </div>
   );
 };
