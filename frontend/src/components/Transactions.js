@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 const transactions = [
-  { name: 'Adobe After Effect', date: 'Sat, 20 Apr 2020', amount: '$80.09', status: 'Deposited' },
-  { name: 'McDonald\'s', date: 'Fri, 19 Apr 2020', amount: '$7.03', status: 'Deposited' },
-  { name: 'Levi\'s', date: 'Tue, 19 Apr 2020', amount: '$30.09', status: 'Deposited' },
+  { name: 'Adobe After Effect', date: 'Sat, 20 Apr 2020', amount: '₹80.09', status: 'Deposited' },
+  { name: 'McDonald\'s', date: 'Fri, 19 Apr 2020', amount: '₹7.03', status: 'Deposited' },
+  { name: 'Levi\'s', date: 'Tue, 19 Apr 2020', amount: '₹30.09', status: 'Deposited' },
 ];
 
 const TransactionTable = () => {
