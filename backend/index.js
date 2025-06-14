@@ -8,7 +8,6 @@ const Goals = require('./modules/Goals')
 const Expense = require('./modules/Expenses')
 const Investment = require('./modules/Investments')
 const Savings = require('./modules/Savings')
-const Activity = require('./modules/Activity');
 dotenv.config();
 
 const app = express();
@@ -317,6 +316,9 @@ app.get('/expenses', authenticateToken, async (req, res) => {
     }
   });
   
+
+
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
