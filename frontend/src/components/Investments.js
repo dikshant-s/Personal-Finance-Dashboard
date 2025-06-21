@@ -136,7 +136,7 @@ const InvestmentPage = () => {
   // Calculate total investment value
   const totalInvestmentValue = investments.reduce((acc, inv) => {
     if (
-      inv &&
+      inv &&  
       typeof inv === "object" &&
       inv.currentPrice != null &&
       inv.quantity != null
@@ -335,10 +335,10 @@ const InvestmentPage = () => {
                   <td className="py-2 px-4">{inv.type}</td>
                   <td className="py-2 px-4">{inv.quantity || 0}</td>
                   <td className="py-2 px-4">
-                    ${(inv.purchasePrice || 0).toFixed(2)}
+                    ₹{(inv.purchasePrice || 0).toFixed(2)}
                   </td>
                   <td className="py-2 px-4">
-                    ${(inv.currentPrice || 0).toFixed(2)}
+                    ₹{(inv.currentPrice || 0).toFixed(2)}
                   </td>
                   <td className="py-2 px-4">&#8377;{totalValue.toFixed(2)}</td>
                   <td className="py-2 px-4">&#8377;{gainLoss.toFixed(2)}</td>
