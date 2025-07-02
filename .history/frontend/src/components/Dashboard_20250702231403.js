@@ -67,9 +67,9 @@ const Dashboard = ({ user }) => {
                       {error ? (
                         <div className="text-red-500">{error}</div>
                       ) : (
-                        <IncomeOutcome type="Income" amount="₹500" />
+                        <IncomeOutcome type="Income" amount="₹0" />
                       )}
-                      <IncomeOutcome type="Outcome" amount="₹200" />
+                      <IncomeOutcome type="Outcome" amount="₹0" />
                     </>
                   )}
                 </div>

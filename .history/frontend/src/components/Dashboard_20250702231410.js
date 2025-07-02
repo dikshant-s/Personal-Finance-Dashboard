@@ -69,7 +69,7 @@ const Dashboard = ({ user }) => {
                       ) : (
                         <IncomeOutcome type="Income" amount="₹500" />
                       )}
-                      <IncomeOutcome type="Outcome" amount="₹200" />
+                      <IncomeOutcome type="Outcome" amount="₹0" />
                     </>
                   )}
                 </div>
