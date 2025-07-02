@@ -290,19 +290,19 @@ app.get('/expenses', authenticateToken, async (req, res) => {
 app.get('/expenses/activity/recent', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 5; // default to 5
 
-    const expenses = await Expense.find({ userId })
+    const recentExpenses = await Expense.find({ userId })
       .sort({ date: -1 })
       .limit(limit);
 
-    res.json(expenses);
+    res.json(recentExpenses);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching recent expenses" });
+    console.error("Error fetching recent activity:", error);
+    res.status(500).json({ message: "Error fetching recent activity" });
   }
 });
-
-
+                                                    
 
   app.get('/total-income', authenticateToken, async (req, res) => {
     try {

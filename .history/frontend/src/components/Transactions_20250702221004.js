@@ -8,7 +8,7 @@ const TransactionTable = () => {
     const fetchRecentExpenses = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/expenses/activity/recent?limit=5`, {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/expenses/activity/recent?limit=10`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

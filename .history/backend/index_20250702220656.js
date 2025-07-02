@@ -286,23 +286,7 @@ app.get('/expenses', authenticateToken, async (req, res) => {
     }
   });
   
- // Get recent expenses for Activity section
-app.get('/expenses/activity/recent', authenticateToken, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const limit = parseInt(req.query.limit) || 5;
-
-    const expenses = await Expense.find({ userId })
-      .sort({ date: -1 })
-      .limit(limit);
-
-    res.json(expenses);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching recent expenses" });
-  }
-});
-
-
+ app.get
 
   app.get('/total-income', authenticateToken, async (req, res) => {
     try {
