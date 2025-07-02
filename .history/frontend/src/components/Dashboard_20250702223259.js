@@ -82,7 +82,7 @@ const Dashboard = ({ user }) => {
 
               {/* Right Column */}
               <div className="w-full lg:w-1/3 flex flex-col gap-6">
-                <CardDetails balance={balance} setBalance = {setBalance} />
+                <CardDetails balance={balance} />
                 <Activity />
               </div>
             </div>

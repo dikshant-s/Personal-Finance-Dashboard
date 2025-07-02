@@ -13,7 +13,7 @@ import BankAccount from "./BankAccount";
 const Dashboard = ({ user }) => {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const [totalIncome, setTotalIncome] = useState(0);
-  const [balance, setBalance] = useState(34929.89); // Initial balance
+  const [balance, setBalance] = useState(34929.); // Initial balance
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const name = localStorage.getItem("name");
@@ -82,7 +82,7 @@ const Dashboard = ({ user }) => {
 
               {/* Right Column */}
               <div className="w-full lg:w-1/3 flex flex-col gap-6">
-                <CardDetails balance={balance} setBalance = {setBalance} />
+                <CardDetails balance={balance} />
                 <Activity />
               </div>
             </div>
