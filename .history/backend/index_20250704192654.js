@@ -87,6 +87,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+
 app.post("/saving-goals", authenticateToken, async (req, res) => {
   const { goalName, targetAmount, currentSavings, deadline, description } =
     req.body;
@@ -268,17 +269,14 @@ app.post("/expenses", authenticateToken, async (req, res) => {
   }
 });
 
+
 // Update an expense
 app.put("/expenses/:id", authenticateToken, async (req, res) => {
   const { amount, category, paymentMethod, date, description } = req.body;
 
   try {
-    const oldExpense = await Expense.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    });
-    if (!oldExpense)
-      return res.status(404).json({ message: "Expense not found" });
+    const oldExpense = await Expense.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!oldExpense) return res.status(404).json({ message: "Expense not found" });
 
     const oldAmount = parseFloat(oldExpense.amount);
     const newAmount = parseFloat(amount);
@@ -301,13 +299,11 @@ app.put("/expenses/:id", authenticateToken, async (req, res) => {
   }
 });
 
+
 // Delete an expense
 app.delete("/expenses/:id", authenticateToken, async (req, res) => {
   try {
-    const expense = await Expense.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    });
+    const expense = await Expense.findOne({ _id: req.params.id, userId: req.user.id });
     if (!expense) {
       return res.status(404).json({ message: "Expense not found" });
     }
@@ -323,6 +319,7 @@ app.delete("/expenses/:id", authenticateToken, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 // Get recent expenses for Activity section
 app.get("/expenses/activity/recent", authenticateToken, async (req, res) => {
@@ -402,11 +399,10 @@ app.put("/balance", authenticateToken, async (req, res) => {
 
     res.json({ message: "Balance updated", balance: user.balance });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to update balance", error: err.message });
+    res.status(500).json({ message: "Failed to update balance", error: err.message });
   }
 });
+
 
 app.get("/total-income", authenticateToken, async (req, res) => {
   try {
@@ -444,19 +440,7 @@ app.get("/total-income", authenticateToken, async (req, res) => {
   }
 });
 
-// ✅ Add this section:
-const path = require("path");
 
-app.use(express.static(path.join(__dirname, "../frontend/build")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-});
-
-// Start server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
