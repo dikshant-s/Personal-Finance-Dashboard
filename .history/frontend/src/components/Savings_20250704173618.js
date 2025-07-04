@@ -60,7 +60,7 @@ const fetchGoals = async () => {
       alert("Session expired. Please login again.");
       localStorage.removeItem("token");
       window.location.href = "/login";
-      return; 
+      return; // ⛔️ prevent further execution
     }
 
     if (!response.ok) {

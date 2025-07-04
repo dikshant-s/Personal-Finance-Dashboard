@@ -27,7 +27,7 @@ app.use(express.json());
 
 const generateToken = (user) => {
   return jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-    expiresIn: "3h",
+    expiresIn: "",
   });
 };
 
@@ -72,21 +72,16 @@ app.post("/login", async (req, res) => {
 });
 
 const authenticateToken = (req, res, next) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
+  const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from Bearer scheme
 
-  if (!token) return res.status(401).json({ message: "No token provided" });
+  if (!token) return res.sendStatus(403); // Forbidden if no token
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      // Token has expired or is invalid
-      return res.status(401).json({ message: "Token expired or invalid" });
-    }
-
-    req.user = user;
-    next();
+    if (err) return res.sendStatus(403); // Forbidden if token is invalid
+    req.user = user; // Set user object to request
+    next(); // Call the next middleware/route handler
   });
 };
-
 
 app.post("/saving-goals", authenticateToken, async (req, res) => {
   const { goalName, targetAmount, currentSavings, deadline, description } =

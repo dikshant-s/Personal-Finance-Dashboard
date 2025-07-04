@@ -20,54 +20,40 @@ const Dashboard = ({ user }) => {
 
   // ✅ Load income + balance from backend
   useEffect(() => {
-  const fetchTotalIncomeAndBalance = async () => {
-    const token = localStorage.getItem("token");
+    const fetchTotalIncomeAndBalance = async () => {
+      const token = localStorage.getItem("token");
 
-    if (!token) {
-      console.error("No token found. Please log in.");
-      return;
-    }
+      try {
+        setLoading(true);
 
-    try {
-      setLoading(true);
+        const [incomeRes, balanceRes] = await Promise.all([
+          fetch(`${process.env.REACT_APP_API_URL}/total-income`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${process.env.REACT_APP_API_URL}/balance`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-      const [incomeRes, balanceRes] = await Promise.all([
-        fetch(`${process.env.REACT_APP_API_URL}/total-income`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${process.env.REACT_APP_API_URL}/balance`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+        if (!incomeRes.ok || !balanceRes.ok) {
+          throw new Error("Failed to fetch income or balance");
+        }
 
-      // 🔐 Handle token expiration (401)
-      if (incomeRes.status === 401 || balanceRes.status === 401) {
-        alert("Session expired. Please login again.");
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-        return;
+        const incomeData = await incomeRes.json();
+        const balanceData = await balanceRes.json();
+
+        setTotalIncome(incomeData.totalIncome);
+        setBalance(balanceData.balance || 0);
+      } catch (error) {
+        console.error(error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      if (!incomeRes.ok || !balanceRes.ok) {
-        throw new Error("Failed to fetch income or balance");
-      }
-
-      const incomeData = await incomeRes.json();
-      const balanceData = await balanceRes.json();
-
-      setTotalIncome(incomeData.totalIncome);
-      setBalance(balanceData.balance || 0);
-    } catch (error) {
-      console.error(error);
-      setError("Something went wrong while fetching data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchTotalIncomeAndBalance();
-}, []);
-
+    fetchTotalIncomeAndBalance();
+  }, []);
 
   const renderComponent = () => {
     switch (activeComponent) {

@@ -18,52 +18,50 @@ const InvestmentPage = () => {
 
   // Fetch investments from the backend
   useEffect(() => {
-    const fetchInvestments = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("No token found, user might not be logged in.");
-        window.location.href = "/login"; // Redirect to login
+  const fetchInvestments = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found, user might not be logged in.");
+      window.location.href = "/login"; // Redirect to login
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/investments`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 401) {
+        // Token expired or invalid
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        window.location.href = "/login"; // Redirect to login page
         return;
       }
 
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/investments`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+      if (!response.ok) {
+        throw new Error("Failed to fetch investments");
+      }
 
-        if (response.status === 401) {
-          // Token expired or invalid
-          alert("Session expired. Please log in again.");
-          localStorage.removeItem("token");
-          window.location.href = "/login"; // Redirect to login page
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch investments");
-        }
-
-        const data = await response.json();
-        if (Array.isArray(data.investments)) {
-          setInvestments(data.investments);
-        } else {
-          console.error("Investments is not an array:", data.investments);
-          setInvestments([]);
-        }
-      } catch (error) {
-        console.error("Error fetching investments:", error);
+      const data = await response.json();
+      if (Array.isArray(data.investments)) {
+        setInvestments(data.investments);
+      } else {
+        console.error("Investments is not an array:", data.investments);
         setInvestments([]);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching investments:", error);
+      setInvestments([]);
+    }
+  };
 
-    fetchInvestments();
-  }, []);
+  fetchInvestments();
+}, []);
+
 
   // Function to add a new investment
   const addInvestment = async (e) => {
@@ -71,23 +69,20 @@ const InvestmentPage = () => {
 
     const token = localStorage.getItem("token");
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/investments`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            assetName: newInvestment.assetName,
-            type: newInvestment.type,
-            quantity: parseInt(newInvestment.quantity) || 0,
-            purchasePrice: parseFloat(newInvestment.purchasePrice) || 0,
-            currentPrice: parseFloat(newInvestment.currentPrice) || 0,
-          }),
-        }
-      );
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/investments`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assetName: newInvestment.assetName,
+          type: newInvestment.type,
+          quantity: parseInt(newInvestment.quantity) || 0,
+          purchasePrice: parseFloat(newInvestment.purchasePrice) || 0,
+          currentPrice: parseFloat(newInvestment.currentPrice) || 0,
+        }),
+      });
 
       if (!response.ok) throw new Error("Failed to add investment");
 
@@ -114,30 +109,28 @@ const InvestmentPage = () => {
     setNewInvestment(investment);
   };
 
+  
   // Function to delete an investment
   const deleteInvestment = async (id) => {
     const token = localStorage.getItem("token");
-
+    
     // Confirm deletion
     if (!window.confirm("Are you sure you want to delete this investment?")) {
       return;
     }
-
+  
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/investments/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/investments/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
       if (!response.ok) {
         throw new Error("Failed to delete investment");
       }
-
+  
       // Update state to remove the deleted investment
       setInvestments((prev) => prev.filter((inv) => inv._id !== id));
     } catch (error) {
@@ -145,6 +138,7 @@ const InvestmentPage = () => {
       alert("Error deleting investment: " + error.message);
     }
   };
+  
 
   // Debugging: Log investments before calculations
   console.log("Investments before calculations:", investments);
@@ -152,7 +146,7 @@ const InvestmentPage = () => {
   // Calculate total investment value
   const totalInvestmentValue = investments.reduce((acc, inv) => {
     if (
-      inv &&
+      inv &&  
       typeof inv === "object" &&
       inv.currentPrice != null &&
       inv.quantity != null
@@ -220,9 +214,7 @@ const InvestmentPage = () => {
 
       {/* Investment Form */}
       <form onSubmit={addInvestment} className="mb-6">
-        <h2 className="text-2xl mb-4">
-          {editingInvestmentId ? "Edit Investment" : "Add New Investment"}
-        </h2>
+        <h2 className="text-2xl mb-4">{editingInvestmentId ? "Edit Investment" : "Add New Investment"}</h2>
         <div className="grid grid-cols-2 gap-4">
           <input
             type="text"

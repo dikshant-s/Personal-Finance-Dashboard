@@ -40,41 +40,38 @@ const Savings = () => {
   const [isEditing, setIsEditing] = useState(false); // To manage editing state
 
   useEffect(() => {
-  fetchGoals();
-}, []);
+    fetchGoals();
+  }, []);
 
-const fetchGoals = async () => {
-  try {
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/saved-goals`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+  const fetchGoals = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/saved-goals`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Include token in the headers
+          },
+        }
+      );
+      if (response.status === 401) {
+        alert("Session expired. Please login again.");
+        localStorage.removeItem("token");
+        window.location.href = "/login"; // or navigate("/login")
       }
-    );
 
-    if (response.status === 401) {
-      alert("Session expired. Please login again.");
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-      return; 
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const goals = await response.json();
+      setGoals(goals);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+      setError("Error fetching goals: " + error.message);
     }
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const goals = await response.json();
-    setGoals(goals);
-  } catch (error) {
-    console.error("Error fetching goals:", error);
-    setError("Error fetching goals: " + error.message);
-  }
-};
-
+  };
 
   const handleGoalChange = (e) => {
     setGoalForm({ ...goalForm, [e.target.name]: e.target.value });
