@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
 const CardDetails = ({ balance, setBalance }) => {
   const [editing, setEditing] = useState(false);
@@ -10,28 +10,30 @@ const CardDetails = ({ balance, setBalance }) => {
   }, [balance]);
 
   const handleSave = async () => {
-    const parsed = parseFloat(newBalance);
-    if (!isNaN(parsed)) {
-      setBalance(parsed); // update UI
+  const parsed = parseFloat(newBalance);
+  if (!isNaN(parsed)) {
+    setBalance(parsed); // update UI
 
-      // Save to backend
-      const token = localStorage.getItem("token");
-      try {
-        await fetch(`${process.env.REACT_APP_API_URL}/balance`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ balance: parsed }),
-        });
-      } catch (err) {
-        console.error("Failed to save balance:", err);
-      }
-
-      setEditing(false);
+    // Save to backend
+    const token = localStorage.getItem("token");
+    try {
+      await fetch(`${process.env.REACT_APP_API_URL}/balance`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ balance: parsed }),
+      });
+    } catch (err) {
+      console.error("Failed to save balance:", err);
     }
-  };
+
+    setEditing(false);
+  }
+};
+
+
 
   return (
     <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 rounded-2xl text-white shadow-md pt-10 pb-10">

@@ -59,12 +59,14 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
     const token = generateToken(user);
-    res.status(200).json({
-      message: "Logged in successfully",
-      token,
-      name: user.name,
-      balance: user.balance,
-    });
+    res
+      .status(200)
+      .json({
+        message: "Logged in successfully",
+        token,
+        name: user.name,
+        balance: user.balance,
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
@@ -363,11 +365,10 @@ app.put("/balance", authenticateToken, async (req, res) => {
     );
     res.json({ message: "Balance updated", balance: user.balance });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to update balance", error: err.message });
+    res.status(500).json({ message: "Failed to update balance", error: err.message });
   }
 });
+
 
 app.get("/total-income", authenticateToken, async (req, res) => {
   try {

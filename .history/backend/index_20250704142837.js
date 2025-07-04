@@ -59,12 +59,9 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
     const token = generateToken(user);
-    res.status(200).json({
-      message: "Logged in successfully",
-      token,
-      name: user.name,
-      balance: user.balance,
-    });
+    res
+      .status(200)
+      .json({ message: "Logged in successfully", token, name: user.name,balance: });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
@@ -336,36 +333,6 @@ app.get("/expenses/paginated", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching paginated expenses" });
-  }
-});
-
-// GET user's balance
-app.get("/balance", authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    res.json({ balance: user.balance || 0 });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-});
-
-// UPDATE user's balance
-app.put("/balance", authenticateToken, async (req, res) => {
-  const { balance } = req.body;
-
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { balance },
-      { new: true }
-    );
-    res.json({ message: "Balance updated", balance: user.balance });
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to update balance", error: err.message });
   }
 });
 

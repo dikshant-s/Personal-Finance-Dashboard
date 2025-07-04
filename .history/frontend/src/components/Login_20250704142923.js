@@ -29,7 +29,7 @@ const Login = () => {
         navigate('/dashboard');
         localStorage.setItem("token", data.token); // Save the token with a key
         localStorage.setItem("name", data.name);
-        localStorage.setItem("balance",data.balance);   // Save the name with a key      
+        localStorage.set   // Save the name with a key      
         
       } else {
         setError(data.message || 'Login failed. Please try again.');
