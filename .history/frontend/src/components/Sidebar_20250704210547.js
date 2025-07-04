@@ -71,18 +71,11 @@ const Sidebar = ({
         </div>
 
         {/* Header logo + name */}
-        <div className="flex items-center space-x-3 mb-10">
-          <img
-            src={siteIcon}
-            alt="Site Logo"
-            className="w-10 h-10 sm:w-11 sm:h-11"
-          />
-          <div className="text-lg sm:text-xl md:text-2xl font-semibold leading-snug">
-            {/* Responsive app name */}
-            <span className="block md:hidden">PFM</span>
-            <span className="hidden md:block">Personal Finance Manager</span>
-          </div>
-        </div>
+        <div className="text-lg sm:text-xl md:text-2xl font-semibold leading-snug text-left break-words max-w-full">
+  {/* Show "PFM" on small screens, full name on md and up */}
+  <span className="block md:hidden">PFM</span>
+  <span className="hidden md:block">Personal Finance Manager</span>
+</div>
 
         {/* Nav Links */}
         <nav className="w-full">

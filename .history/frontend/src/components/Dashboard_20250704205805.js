@@ -11,6 +11,7 @@ import Investments from "./Investments";
 import BankAccount from "./BankAccount";
 import { Menu } from "lucide-react"; // or use Heroicons / FontAwesome
 
+
 const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const [totalIncome, setTotalIncome] = useState(0);
@@ -78,11 +79,7 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
             <header className="text-2xl sm:text-3xl mb-6 font-semibold">
               <h1>Welcome back, {name}</h1>
             </header>
-            <div className="lg:hidden flex items-center p-4">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)}>
-                <Menu className="text-white w-8 h-8" />
-              </button>
-            </div>
+            
             <div className="main flex flex-col lg:flex-row gap-6">
               {/* Left Column */}
               <div className="w-full lg:w-2/3">
@@ -135,8 +132,6 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
         setActiveComponent={setActiveComponent}
         setUser={setUser}
         setIsAuthenticated={setIsAuthenticated}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
       />
       <main className="w-full lg:w-4/5 p-4 sm:p-6 md:p-8">
         {renderComponent()}

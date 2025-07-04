@@ -135,8 +135,6 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
         setActiveComponent={setActiveComponent}
         setUser={setUser}
         setIsAuthenticated={setIsAuthenticated}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
       />
       <main className="w-full lg:w-4/5 p-4 sm:p-6 md:p-8">
         {renderComponent()}
