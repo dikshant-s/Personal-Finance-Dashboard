@@ -70,27 +70,23 @@ const Expenses = ({ balance, setBalance }) => {
   };
 
   const deleteExpense = async (id) => {
-  const token = localStorage.getItem('token');
-  const expenseToDelete = expenses.find(exp => exp._id === id); // 👈 Get amount before delete
+    const token = localStorage.getItem('token'); // Retrieve the token from local storage
 
-  const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-    },
-  });
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
+      },
+    });
 
-  if (response.ok) {
-    setExpenses(expenses.filter((expense) => expense._id !== id));
-    if (expenseToDelete) {
-      setBalance((prev) => prev + parseFloat(expenseToDelete.amount)); // 👈 Add it back
+    if (response.ok) {
+      // If the delete was successful, update the state to remove the deleted expense
+      setExpenses(expenses.filter((expense) => expense._id !== id));
+    } else {
+      const errorData = await response.json();
+      console.error('Error deleting expense:', errorData.message); // Log any error message from the server
     }
-  } else {
-    const errorData = await response.json();
-    console.error('Error deleting expense:', errorData.message);
-  }
-};
-
+  };
 
   const handleAddOrUpdateExpense = async (e) => {
     e.preventDefault();

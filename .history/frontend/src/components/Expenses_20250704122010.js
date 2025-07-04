@@ -12,15 +12,18 @@ const Expenses = ({ balance, setBalance }) => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+      const token = localStorage.getItem("token"); // Retrieve the token from localStorage
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`, // Include token in the Authorization header
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/expenses`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`, // Include token in the Authorization header
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -32,75 +35,89 @@ const Expenses = ({ balance, setBalance }) => {
     fetchExpenses();
   }, []);
 
-
   const addExpense = async (newExpense) => {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    body: JSON.stringify(newExpense),
-  });
-
-  if (response.ok) {
-    const data = await response.json();
-    setExpenses([...expenses, data]);
-    setBalance((prev) => prev - parseFloat(data.amount)); // 👈 Update balance
-  } else {
-    const errorData = await response.json();
-    console.error('Error adding expense:', errorData.message);
-  }
-};
-
-
-
-  const editExpense = async (updatedExpense) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses/${updatedExpense._id}`, {
-      method: "PUT",
+    const token = localStorage.getItem("token"); // Retrieve the token from local storage
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
       },
-      body: JSON.stringify(updatedExpense),
+      body: JSON.stringify(newExpense),
     });
+
+    if (response.ok) {
+      const data = await response.json();
+      setExpenses([...expenses, data]); // Update the expenses state with the new expense
+    } else {
+      const errorData = await response.json();
+      console.error("Error adding expense:", errorData.message); // Log any error message from the server
+    }
+  };
+
+  const editExpense = async (updatedExpense) => {
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/expenses/${updatedExpense._id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedExpense),
+      }
+    );
     const data = await response.json();
-    setExpenses(expenses.map((expense) => (expense._id === data._id ? data : expense)));
+    setExpenses(
+      expenses.map((expense) => (expense._id === data._id ? data : expense))
+    );
     setEditingExpense(null); // Clear editing state
   };
 
   const deleteExpense = async (id) => {
-  const token = localStorage.getItem('token');
-  const expenseToDelete = expenses.find(exp => exp._id === id); // 👈 Get amount before delete
+    const token = localStorage.getItem("token"); // Retrieve the token from local storage
 
-  const response = await fetch(`${process.env.REACT_APP_API_URL}/expenses/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-    },
-  });
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+      },
+    });
 
-  if (response.ok) {
-    setExpenses(expenses.filter((expense) => expense._id !== id));
-    if (expenseToDelete) {
-      setBalance((prev) => prev + parseFloat(expenseToDelete.amount)); // 👈 Add it back
+    if (response.ok) {
+      // If the delete was successful, update the state to remove the deleted expense
+      setExpenses(expenses.filter((expense) => expense._id !== id));
+    } else {
+      const errorData = await response.json();
+      console.error("Error deleting expense:", errorData.message); // Log any error message from the server
     }
-  } else {
-    const errorData = await response.json();
-    console.error('Error deleting expense:', errorData.message);
-  }
-};
-
+  };
 
   const handleAddOrUpdateExpense = async (e) => {
     e.preventDefault();
     if (amount && category && paymentMethod && date) {
-      const newExpense = { amount, category, paymentMethod, date, description };
+      const parsedAmount = parseFloat(amount);
+      const newExpense = {
+        amount: parsedAmount,
+        category,
+        paymentMethod,
+        date,
+        description,
+      };
+
       if (editingExpense) {
+        const oldAmount = parseFloat(editingExpense.amount);
         await editExpense({ ...newExpense, _id: editingExpense._id });
+
+        // 🔁 Adjust balance based on old and new amount
+        setBalance((prev) => prev - oldAmount + parsedAmount);
       } else {
         await addExpense(newExpense);
+
+        // ➖ Subtract new amount from balance
+        setBalance((prev) => prev - parsedAmount);
       }
+
+      // 🔄 Reset form
       setAmount("");
       setCategory("");
       setPaymentMethod("");
@@ -112,7 +129,9 @@ const Expenses = ({ balance, setBalance }) => {
 
   return (
     <div className="bg-indigo-950 p-4   rounded-2xl overflow-hidden">
-      <h2 className="text-xl font-bold mb-4">{editingExpense ? "Edit Expense" : "Add Expense"}</h2>
+      <h2 className="text-xl font-bold mb-4">
+        {editingExpense ? "Edit Expense" : "Add Expense"}
+      </h2>
       <form onSubmit={handleAddOrUpdateExpense} className="mb-6">
         <div className="grid grid-cols-2 gap-4">
           <input
@@ -187,10 +206,16 @@ const Expenses = ({ balance, setBalance }) => {
             {expenses.map((expense) => (
               <tr key={expense._id} className="text-white">
                 <td className="border border-gray-600 p-2">{expense.amount}</td>
-                <td className="border border-gray-600 p-2">{expense.category}</td>
-                <td className="border border-gray-600 p-2">{expense.paymentMethod}</td>
+                <td className="border border-gray-600 p-2">
+                  {expense.category}
+                </td>
+                <td className="border border-gray-600 p-2">
+                  {expense.paymentMethod}
+                </td>
                 <td className="border border-gray-600 p-2">{expense.date}</td>
-                <td className="border border-gray-600 p-2">{expense.description}</td>
+                <td className="border border-gray-600 p-2">
+                  {expense.description}
+                </td>
                 <td className="border border-gray-600 p-2">
                   <button
                     onClick={() => {
@@ -207,7 +232,9 @@ const Expenses = ({ balance, setBalance }) => {
                   </button>
                   <button
                     onClick={async () => {
-                      const confirmed = window.confirm("Are you sure you want to delete this expense?");
+                      const confirmed = window.confirm(
+                        "Are you sure you want to delete this expense?"
+                      );
                       if (confirmed) {
                         await deleteExpense(expense._id); // Call the existing delete function
                       }
@@ -219,7 +246,6 @@ const Expenses = ({ balance, setBalance }) => {
                 </td>
               </tr>
             ))}
-
           </tbody>
         </table>
       </div>
