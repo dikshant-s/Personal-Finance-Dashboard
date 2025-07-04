@@ -43,19 +43,20 @@ function App() {
           />
           <Route path="/signup" element={<Signup />} />
           <Route
-            path="/dashboard"
-            element={
-              isAuthenticated ? (
-                <Dashboard
-                  user={user}
-                  setUser={setUser}
-                  setIsAuthenticated={setIsAuthenticated}
-                />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
+  path="/dashboard"
+  element={
+    isAuthenticated ? (
+      <Dashboard
+        user={user}
+        setUser={setUser}
+        setIsAuthenticated={setIsAuthenticated}
+      />
+    ) : (
+      <Navigate to="/" />
+    )
+  }
+/>
+
         </Routes>
       </div>
     </Router>

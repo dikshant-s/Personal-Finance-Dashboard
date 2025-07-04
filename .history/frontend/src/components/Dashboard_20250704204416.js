@@ -10,7 +10,7 @@ import Savings from "./Savings";
 import Investments from "./Investments";
 import BankAccount from "./BankAccount";
 
-const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
+const Dashboard = ({ user }) => {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const [totalIncome, setTotalIncome] = useState(0);
   const [balance, setBalance] = useState(0); // Will be fetched from backend

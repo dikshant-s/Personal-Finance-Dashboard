@@ -8,7 +8,7 @@ import siteIcon from "../assets/siteIcon.svg";
 import logout from "../assets/logout.svg";
 import { useNavigate } from "react-router-dom";
 
-const Sidebar = ({ setActiveComponent, setUser, setIsAuthenticated }) => {
+const Sidebar = ({ setActiveComponent }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
 
@@ -18,11 +18,7 @@ const Sidebar = ({ setActiveComponent, setUser, setIsAuthenticated }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("name");
-
-    setUser(null);
-    setIsAuthenticated(false);
-
-    navigate("/"); // redirect to login
+    navigate("/");
   };
 
   useEffect(() => {

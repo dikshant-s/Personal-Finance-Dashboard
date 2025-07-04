@@ -10,7 +10,7 @@ import Savings from "./Savings";
 import Investments from "./Investments";
 import BankAccount from "./BankAccount";
 
-const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
+const Dashboard = ({ user }) => {
   const [activeComponent, setActiveComponent] = useState("Dashboard");
   const [totalIncome, setTotalIncome] = useState(0);
   const [balance, setBalance] = useState(0); // Will be fetched from backend
@@ -126,10 +126,10 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white transition-colors duration-300">
       <Sidebar
-        setActiveComponent={setActiveComponent}
-        setUser={setUser}
-        setIsAuthenticated={setIsAuthenticated}
-      />
+  setActiveComponent={setActiveComponent}
+  setUser={setUser}
+  setIsAuthenticated={setIsAuthenticated}
+/>
       <main className="w-full lg:w-4/5 p-4 sm:p-6 md:p-8">
         {renderComponent()}
       </main>
