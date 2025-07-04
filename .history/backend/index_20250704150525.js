@@ -266,27 +266,19 @@ app.post("/expenses", authenticateToken, async (req, res) => {
 
 
 // Update an expense
-app.put("/expenses/:id", authenticateToken, async (req, res) => {
+app.put("/expenses/:id", async (req, res) => {
   const { amount, category, paymentMethod, date, description } = req.body;
 
   try {
-    const oldExpense = await Expense.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!oldExpense) return res.status(404).json({ message: "Expense not found" });
-
-    const oldAmount = parseFloat(oldExpense.amount);
-    const newAmount = parseFloat(amount);
-    const diff = oldAmount - newAmount; // +ve = refund to user, -ve = deduct more
-
     const updatedExpense = await Expense.findByIdAndUpdate(
       req.params.id,
       { amount, category, paymentMethod, date, description },
-      { new: true }
+      { new: true } // Return the updated document
     );
 
-    // Update balance with the difference
-    await User.findByIdAndUpdate(req.user.id, {
-      $inc: { balance: diff },
-    });
+    if (!updatedExpense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
 
     res.json(updatedExpense);
   } catch (error) {
@@ -294,27 +286,20 @@ app.put("/expenses/:id", authenticateToken, async (req, res) => {
   }
 });
 
-
 // Delete an expense
-app.delete("/expenses/:id", authenticateToken, async (req, res) => {
+app.delete("/expenses/:id", async (req, res) => {
   try {
-    const expense = await Expense.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!expense) {
-      return res.status(404).json({ message: "Expense not found" });
+    const removedExpense = await Expense.findByIdAndDelete(req.params.id);
+
+    if (!removedExpense) {
+      return res.status(404).json({ message: "Expense not found" }); // Handle not found
     }
 
-    // Add the amount back to balance
-    await User.findByIdAndUpdate(req.user.id, {
-      $inc: { balance: parseFloat(expense.amount) },
-    });
-
-    await Expense.deleteOne({ _id: req.params.id });
-    res.json({ message: "Expense deleted" });
+    res.json(removedExpense);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 // Get recent expenses for Activity section
 app.get("/expenses/activity/recent", authenticateToken, async (req, res) => {

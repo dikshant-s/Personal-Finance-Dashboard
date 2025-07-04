@@ -296,25 +296,19 @@ app.put("/expenses/:id", authenticateToken, async (req, res) => {
 
 
 // Delete an expense
-app.delete("/expenses/:id", authenticateToken, async (req, res) => {
+app.delete("/expenses/:id", async (req, res) => {
   try {
-    const expense = await Expense.findOne({ _id: req.params.id, userId: req.user.id });
-    if (!expense) {
-      return res.status(404).json({ message: "Expense not found" });
+    const removedExpense = await Expense.findByIdAndDelete(req.params.id);
+
+    if (!removedExpense) {
+      return res.status(404).json({ message: "Expense not found" }); // Handle not found
     }
 
-    // Add the amount back to balance
-    await User.findByIdAndUpdate(req.user.id, {
-      $inc: { balance: parseFloat(expense.amount) },
-    });
-
-    await Expense.deleteOne({ _id: req.params.id });
-    res.json({ message: "Expense deleted" });
+    res.json(removedExpense);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 // Get recent expenses for Activity section
 app.get("/expenses/activity/recent", authenticateToken, async (req, res) => {
