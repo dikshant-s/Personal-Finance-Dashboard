@@ -27,7 +27,7 @@ app.use(express.json());
 
 const generateToken = (user) => {
   return jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, {
-    expiresIn: "30s", // Token expires in 30 seconds
+    expiresIn: "30sec", // Token expires in 30 seconds
   });
 };
 

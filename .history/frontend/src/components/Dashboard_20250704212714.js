@@ -82,7 +82,7 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
         if (incomeRes.status === 401 || balanceRes.status === 401) {
           alert("Session expired. Please login again.");
           localStorage.removeItem("token");
-          window.location.href = "/";
+          window.location.href = "/login";
           return;
         }
 

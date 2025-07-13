@@ -23,33 +23,18 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
 
   useEffect(() => {
     const name = localStorage.getItem("name") || "User";
-    const firstName = name.split(" ")[0];
+
     const greetings = [
-      `Hey ${firstName} 👋 Ready to crush your savings goals?`,
-      `Welcome back, ${firstName}! Your money is waiting 💸`,
-      `Let’s make smart moves today, ${firstName} 🧠💰`,
-      `Great to see you again, ${firstName}! 🚀`,
-      `You're in charge, ${firstName} — let’s build wealth! 💼`,
-      `What’s the plan today, ${firstName}? Let's dominate 💪`,
-      `${firstName}, the finance master is here! 👑`,
-      `Time to grow that balance, ${firstName} 🌱`,
-      `${firstName}, you're just one click away from control 🧾`,
-      `Rise and grind, ${firstName} 💼 Let’s handle that cashflow!`,
-      `Yo ${firstName}! Ready to conquer 💪`,
-      `Hey ${firstName}, let's stack cash 💸`,
-      `Back at it, ${firstName}! 🔥`,
-      `Go get it, ${firstName}! 🚀`,
-      `Let’s win the day, ${firstName}! 🏆`,
-      `${firstName}, you're unstoppable 🧠`,
-      `Time to shine, ${firstName}! ✨`,
-      `Welcome, boss ${firstName}! 💼`,
-      `Let’s slay those expenses, ${firstName}! ⚔️`,
-      `Money moves time, ${firstName} 💰`,
-      `Crush it today, ${firstName}! 👊`,
-      `Fuel up, ${firstName} — grind mode ON 🔋`,
-      `Let’s grow that bank, ${firstName} 🌱`,
-      `Make it count, ${firstName}! ✅`,
-      `${firstName}, you got this! 🙌`,
+      `Hey ${name} 👋 Ready to crush your savings goals?`,
+      `Welcome back, ${name}! Your money is waiting 💸`,
+      `Let’s make smart moves today, ${name} 🧠💰`,
+      `Great to see you again, ${name}! 🚀`,
+      `You're in charge, ${name} — let’s build wealth! 💼`,
+      `What’s the plan today, ${name}? Let's dominate 💪`,
+      `${name}, the finance master is here! 👑`,
+      `Time to grow that balance, ${name} 🌱`,
+      `${name}, you're just one click away from control 🧾`,
+      `Rise and grind, ${name} 💼 Let’s handle that cashflow!`,
     ];
 
     const randomIndex = Math.floor(Math.random() * greetings.length);
@@ -82,7 +67,7 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
         if (incomeRes.status === 401 || balanceRes.status === 401) {
           alert("Session expired. Please login again.");
           localStorage.removeItem("token");
-          window.location.href = "/";
+          window.location.href = "/login";
           return;
         }
 
@@ -112,8 +97,8 @@ const Dashboard = ({ user, setUser, setIsAuthenticated }) => {
         return (
           <div>
             <h1 className="text-2xl sm:text-3xl mb-6 font-semibold">
-              {greeting}
-            </h1>
+  {greeting}
+</h1>
             <div className="lg:hidden flex items-center p-4">
               <button onClick={() => setSidebarOpen(!sidebarOpen)}>
                 <Menu className="text-white w-8 h-8" />
